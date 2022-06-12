@@ -1,0 +1,4 @@
+1. all parameters of a module must be declared in source_code/src/main/scala/constants.scala.
+	- For each module a sperate object must be decleared. Name of object constants_(source file path)_(module name)
+	
+2. Local variables in hardware generate def is camelCase
