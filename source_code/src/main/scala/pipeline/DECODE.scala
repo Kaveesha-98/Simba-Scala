@@ -41,7 +41,7 @@ class DECODE_UNIT extends Module{
 	
 	val type_w = pipelineParams.INS_TYPE_ROM.foldRight(pipelineParams.ntype.U(3.W))((ins_entry, otherwise) => {
 		ins_entry match {
-			case (opcode, ins_type ) => Mux(opcode.U === io.INSTRUCTION, ins_type.U(3.W), otherwise)
+			case (opcode, ins_type ) => Mux(opcode.U === io.INSTRUCTION(6, 0), ins_type.U(3.W), otherwise)
 		}
 	})
 	
