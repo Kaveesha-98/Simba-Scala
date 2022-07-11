@@ -45,6 +45,7 @@ class DECODE_UNIT extends Module{
 		}
 	})
 	
+    
 	io.out := type_w
 }
 
