@@ -1,0 +1,7 @@
+*.json
+*.fir
+*.v
+source_code/target/
+source_code/project/
+*.bsp
+*.idea
