@@ -4,12 +4,14 @@ import chisel3.Driver
 
 object paramFunctions {
 
-    /* function used map a hardware wire to a output
-        mapEntries = Seq[(inputMatchCase, result)]
-        default = Default output when none of the inputMatchCase matches
-        f = Matching function(function that compares inputMatchCase and mapInput)
-        mapInput = input to hardware implemented map
-    */
+    /** function used map a hardware wire to a output
+     *
+     * @param mapEntries Seq[(inputMatchCase, result)]
+     * @param default output when none of the inputMatchCase matches
+     * @param f Matching function(function that compares inputMatchCase and mapInput)
+     * @param mapInput input to hardware implemented map
+     * @return TODO(Kaveesha)
+     */
     def mapInputToOutput[T <: Data](mapEntries: Seq[(T, T)], default: T, f: (T, T) => chisel3.Bool)( mapInput: T): T = {
         val conditionArray = Seq.tabulate(mapEntries.length)(i => {
             mapEntries(i) match {
