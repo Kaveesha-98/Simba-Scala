@@ -4,16 +4,6 @@ import chisel3.Driver
 
 object pipelineParams {
 
-    def mapInputToOutput[T <: Data](mapEntries: Seq[(T, T)], default: T, f: (T, T) => chisel3.Bool)( mapInput: T): T = {
-        val conditionArray = Seq.tabulate(mapEntries.length)(i => {
-            mapEntries(i) match {
-                case (matchDataCase, matchResult) => f(matchDataCase, mapInput) -> matchResult
-            }
-        })
-
-        MuxCase(default, conditionArray)
-    }
-
 	//instruction opcodes 
     val lui      = "b0110111"
     val auipc    = "b0010111"
@@ -39,43 +29,8 @@ object pipelineParams {
     val jtype       =  "b101"  
     val ntype       =  "b110" 
 
-    val typeSeq = Seq(rtype, itype, stype, btype, utype, jtype, ntype) 
-
     //type of write to be done
     val  idle  = "b00"
     val  ld    = "b01"
     val  alu   = "b10"
-    
-    val instructionOpcodeToTypeMap = Seq((lui.U, utype.U), (auipc.U, utype.U), (jump.U, jtype.U), (jumpr.U, itype.U), (cjump.U, btype.U), (load.U, itype.U), (store.U, stype.U), (iops.U, itype.U), (iops32.U, itype.U), (rops.U, rtype.U), (rops32.U, rtype.U), (system.U, itype.U), (fence.U, ntype.U), (amos.U, rtype.U))
-	//default :   TYPE=ntype;
-    val INS_TYPE_ROM = mapInputToOutput(instructionOpcodeToTypeMap, ntype.U, (x: chisel3.UInt, y: chisel3.UInt) => x === y)(_)
-
-    val itype_imm = Seq((53, 32), (30, 20))
-    val stype_imm = Seq((53, 32), (30, 25), (11, 7))
-    val btype_imm = Seq((52, 32), (7, 7), (30, 25), (11, 8), (1, 0))
-    val utype_imm = Seq((32, 32), (31, 12), (12, 0))
-    val jtype_imm = Seq((44, 32), (19, 12), (20, 20), (30, 25), (24, 21), (1, 0))
-    val ntype_imm = Seq((64, 0))
-    val rtype_imm = Seq((64, 0))
-
-    //val IMM_EXT = Seq(rtype_imm, itype_imm, stype_imm, btype_imm, utype_imm, jtype_imm, ntype_imm)
-
-    val immediateEncodingsMap = Map((rtype -> rtype_imm), (itype -> itype_imm), (stype -> stype_imm), (btype -> btype_imm), (utype -> utype_imm), (jtype -> jtype_imm), (ntype -> ntype_imm))
-
-    def IMM_EXT(machineInstruction: chisel3.UInt, type_w: chisel3.UInt): chisel3.UInt = {
-
-        val immediateMap = typeSeq.map(instructionType => {
-            val immediate = Cat(immediateEncodingsMap(instructionType).map( imm_map => {
-                imm_map match {
-                    case (x, 32) => Fill(x, machineInstruction(31))
-                    case (x, 0)  => 0.U(x.W)
-                    case (x, y)  => machineInstruction(x, y)
-                }
-            }))
-            (instructionType.U, immediate)
-        })
-
-        mapInputToOutput(immediateMap, 0.U(64.W), (x: chisel3.UInt, y: chisel3.UInt) => x === y)(type_w)
-
-    }
 }
