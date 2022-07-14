@@ -62,21 +62,19 @@ object paramFunctions {
 
     //val IMM_EXT = Seq(rtype_imm, itype_imm, stype_imm, btype_imm, utype_imm, jtype_imm, ntype_imm)
 
-    val immediateEncodingsMap = Map((pipelineParams.rtype -> rtype_imm), (pipelineParams.itype -> itype_imm), 
-                                    (pipelineParams.stype -> stype_imm), (pipelineParams.btype -> btype_imm), 
-                                    (pipelineParams.utype -> utype_imm), (pipelineParams.jtype -> jtype_imm), 
-                                    (pipelineParams.ntype -> ntype_imm))
+    val immediateEncodingsMap = Map(pipelineParams.rtype -> rtype_imm, pipelineParams.itype -> itype_imm,
+                                    pipelineParams.stype -> stype_imm, pipelineParams.btype -> btype_imm,
+                                    pipelineParams.utype -> utype_imm, pipelineParams.jtype -> jtype_imm,
+                                    pipelineParams.ntype -> ntype_imm)
 
     def IMM_EXT(machineInstruction: chisel3.UInt, type_w: chisel3.UInt): chisel3.UInt = {
 
         val immediateMap = typeSeq.map(instructionType => {
-            val immediate = Cat(immediateEncodingsMap(instructionType).map( imm_map => {
-                imm_map match {
-                    case (x, 32) => Fill(x, machineInstruction(31))
-                    case (x, 0)  => 0.U(x.W)
-                    case (x, y)  => machineInstruction(x, y)
-                }
-            }))
+            val immediate = Cat(immediateEncodingsMap(instructionType).map {
+              case (x, 32) => Fill(x, machineInstruction(31))
+              case (x, 0) => 0.U(x.W)
+              case (x, y) => machineInstruction(x, y)
+            })
             (instructionType.U, immediate)
         })
 
