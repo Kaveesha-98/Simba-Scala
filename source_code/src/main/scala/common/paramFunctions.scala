@@ -4,7 +4,8 @@ import chisel3.Driver
 
 object paramFunctions {
 
-    /** function used map a hardware wire to a output
+    /**
+     * function used map a hardware wire to a output
      *
      * @param mapEntries Seq[(inputMatchCase, result)]
      * @param default output when none of the inputMatchCase matches
