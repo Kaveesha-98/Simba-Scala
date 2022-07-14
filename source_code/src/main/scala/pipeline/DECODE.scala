@@ -21,7 +21,7 @@ class DECODE_UNIT extends Module{
 	})) */
     val type_w = RegNext(pipelineParams.INS_TYPE_ROM(io.INSTRUCTION(6, 0)))
 	
-    val IMM_EXT = VecInit.tabulate(pipelineParams.IMM_EXT.length)(i => {
+    /* val IMM_EXT = VecInit.tabulate(pipelineParams.IMM_EXT.length)(i => {
         Cat(pipelineParams.IMM_EXT(i).map(imm_map => {
             imm_map match {
                 case (x, 32) => Fill(x, io.INSTRUCTION(31))
@@ -29,9 +29,9 @@ class DECODE_UNIT extends Module{
                 case (x, y)  => io.INSTRUCTION(x, y)
             }
         }))
-    })
+    }) */
 
-    val imm_out = IMM_EXT(type_w)
+    val imm_out = pipelineParams.IMM_EXT(io.INSTRUCTION, type_w)
 
     val rs1_sel_mux = VecInit.tabulate(8)(i => {
         if (Seq(0, 1, 2, 3).contains(i)) {io.INSTRUCTION(19, 15)}
