@@ -14,25 +14,13 @@ class DECODE_UNIT extends Module{
         val out3 = Output(UInt(64.W))
 	})
 	
-	/* val type_w = RegNext(pipelineParams.INS_TYPE_ROM.foldRight(pipelineParams.ntype.U(3.W))((ins_entry, otherwise) => {
-		ins_entry match {
-			case (opcode, ins_type ) => Mux(opcode === io.INSTRUCTION(6, 0), ins_type, otherwise)
-		}
-	})) */
-    val type_w = RegNext(pipelineParams.INS_TYPE_ROM(io.INSTRUCTION(6, 0)))
+	/* opcode of the instruction is mapped to number according to paramFunctions.instructionOpcodeToTypeMap */
+    val type_w = WireInit(paramFunctions.INS_TYPE_ROM(io.INSTRUCTION(6, 0)))
 	
-    /* val IMM_EXT = VecInit.tabulate(pipelineParams.IMM_EXT.length)(i => {
-        Cat(pipelineParams.IMM_EXT(i).map(imm_map => {
-            imm_map match {
-                case (x, 32) => Fill(x, io.INSTRUCTION(31))
-                case (x, 0)  => 0.U(x.W)
-                case (x, y)  => io.INSTRUCTION(x, y)
-            }
-        }))
-    }) */
+    /* immediate according type_w generated according the opcode */
+    val imm_out = paramFunctions.IMM_EXT(io.INSTRUCTION, type_w)
 
-    val imm_out = pipelineParams.IMM_EXT(io.INSTRUCTION, type_w)
-
+    /* selects which register to read as rs1 */
     val rs1_sel_mux = VecInit.tabulate(8)(i => {
         if (Seq(0, 1, 2, 3).contains(i)) {io.INSTRUCTION(19, 15)}
         else {0.U(5.W)}
@@ -40,6 +28,7 @@ class DECODE_UNIT extends Module{
 
     val rs1_sel = rs1_sel_mux(type_w)
 
+    /* selects which register to read as rs2 */
     val rs2_sel_mux = VecInit.tabulate(8)(i => {
         if (Seq(0, 2, 3).contains(i)) {io.INSTRUCTION(24, 20)}
         else {0.U(5.W)}
@@ -47,11 +36,12 @@ class DECODE_UNIT extends Module{
 
     val rs2_sel = rs2_sel_mux(type_w)
 
+    /* register file of the cpu */
     val registerFile = new Array[chisel3.UInt](32)
     val REG_ARRAY = VecInit.tabulate(32)(i => {
-        if (i == 0) { registerFile(i) = 0.U(64.W) }
+        if (i == 0) { registerFile(i) = 0.U(64.W) } //x0 is hardwired to ground
         else { 
-            registerFile(i) = RegInit((if (i == 2) "h10000" else "h0").U(64.W))
+            registerFile(i) = RegInit((if (i == 2) "h10000" else "h0").U(64.W))// when reset x2 is set to 32'h10000
             when (io.WB_DES === i.U & (io.TYPE_MEM3_WB =/= pipelineParams.idle.U)){
                 registerFile(i) := io.WB_DATA
             }
@@ -65,7 +55,7 @@ class DECODE_UNIT extends Module{
 
 	io.out := imm_out
 
-    io.out2 := rs1_out
+    io.out2 := rs1_out + 1.U
     io.out3 := rs2_out
 
     /* val x = RegInit(0.U(1.W))
