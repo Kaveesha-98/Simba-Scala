@@ -37,7 +37,9 @@ object pipelineParams {
     val btype       =  "b011"  
     val utype       =  "b100"  
     val jtype       =  "b101"  
-    val ntype       =  "b110"  
+    val ntype       =  "b110" 
+
+    val typeSeq = Seq(rtype, itype, stype, btype, utype, jtype, ntype) 
 
     //type of write to be done
     val  idle  = "b00"
@@ -56,5 +58,24 @@ object pipelineParams {
     val ntype_imm = Seq((64, 0))
     val rtype_imm = Seq((64, 0))
 
-    val IMM_EXT = Seq(rtype_imm, itype_imm, stype_imm, btype_imm, utype_imm, jtype_imm, ntype_imm)
+    //val IMM_EXT = Seq(rtype_imm, itype_imm, stype_imm, btype_imm, utype_imm, jtype_imm, ntype_imm)
+
+    val immediateEncodingsMap = Map((rtype -> rtype_imm), (itype -> itype_imm), (stype -> stype_imm), (btype -> btype_imm), (utype -> utype_imm), (jtype -> jtype_imm), (ntype -> ntype_imm))
+
+    def IMM_EXT(machineInstruction: chisel3.UInt, type_w: chisel3.UInt): chisel3.UInt = {
+
+        val immediateMap = typeSeq.map(instructionType => {
+            val immediate = Cat(immediateEncodingsMap(instructionType).map( imm_map => {
+                imm_map match {
+                    case (x, 32) => Fill(x, machineInstruction(31))
+                    case (x, 0)  => 0.U(x.W)
+                    case (x, y)  => machineInstruction(x, y)
+                }
+            }))
+            (instructionType.U, immediate)
+        })
+
+        mapInputToOutput(immediateMap, 0.U(64.W), (x: chisel3.UInt, y: chisel3.UInt) => x === y)(type_w)
+
+    }
 }
