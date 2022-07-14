@@ -1,6 +1,11 @@
+package pipeline
+
 import chisel3._
 import chisel3.util._
 import chisel3.Driver
+
+import common.paramFunctions
+import common.pipelineParams
 
 class DECODE_UNIT extends Module{
 	val io = IO(new Bundle{
