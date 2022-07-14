@@ -44,9 +44,9 @@ object pipelineParams {
     val  ld    = "b01"
     val  alu   = "b10"
     
-    val INS_TYPE_ROM = Seq((lui.U, utype.U), (auipc.U, utype.U), (jump.U, jtype.U), (jumpr.U, itype.U), (cjump.U, btype.U), (load.U, itype.U), (store.U, stype.U), (iops.U, itype.U), (iops32.U, itype.U), (rops.U, rtype.U), (rops32.U, rtype.U), (system.U, itype.U), (fence.U, ntype.U), (amos.U, rtype.U))
+    val instructionOpcodeToTypeMap = Seq((lui.U, utype.U), (auipc.U, utype.U), (jump.U, jtype.U), (jumpr.U, itype.U), (cjump.U, btype.U), (load.U, itype.U), (store.U, stype.U), (iops.U, itype.U), (iops32.U, itype.U), (rops.U, rtype.U), (rops32.U, rtype.U), (system.U, itype.U), (fence.U, ntype.U), (amos.U, rtype.U))
 	//default :   TYPE=ntype;
-    val getOpTypeFor = mapInputToOutput(INS_TYPE_ROM, ntype.U, (x: chisel3.UInt, y: chisel3.UInt) => x === y)(_)
+    val INS_TYPE_ROM = mapInputToOutput(instructionOpcodeToTypeMap, ntype.U, (x: chisel3.UInt, y: chisel3.UInt) => x === y)(_)
 
     val itype_imm = Seq((53, 32), (30, 20))
     val stype_imm = Seq((53, 32), (30, 25), (11, 7))

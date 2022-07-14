@@ -19,7 +19,7 @@ class DECODE_UNIT extends Module{
 			case (opcode, ins_type ) => Mux(opcode === io.INSTRUCTION(6, 0), ins_type, otherwise)
 		}
 	})) */
-    val type_w = RegNext(pipelineParams.getOpTypeFor(io.INSTRUCTION(6, 0)))
+    val type_w = RegNext(pipelineParams.INS_TYPE_ROM(io.INSTRUCTION(6, 0)))
 	
     val IMM_EXT = VecInit.tabulate(pipelineParams.IMM_EXT.length)(i => {
         Cat(pipelineParams.IMM_EXT(i).map(imm_map => {
