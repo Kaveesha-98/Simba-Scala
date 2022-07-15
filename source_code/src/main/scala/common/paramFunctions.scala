@@ -15,12 +15,8 @@ object paramFunctions {
      * @param mapInput input to hardware implemented map
      * @return TODO(Kaveesha)
      */
-    def mapInputToOutput[T <: Data](mapEntries: Seq[(T, T)], default: T, f: (T, T) => chisel3.Bool)( mapInput: T): T = {
-        val conditionArray = Seq.tabulate(mapEntries.length)(i => {
-            mapEntries(i) match {
-                case (matchDataCase, matchResult) => f(matchDataCase, mapInput) -> matchResult
-            }
-        })
+    def mapInputToOutput[T <: Data](mapSeq: Seq[String], mapEntries: Map[String , T], default: T, f: (String, T) => chisel3.Bool)( mapInput: T): T = {
+        val conditionArray = mapSeq.map(mapCondition => f(mapCondition, mapInput) -> mapEntries(mapCondition))
 
         MuxCase(default, conditionArray)
     }
@@ -30,23 +26,38 @@ object paramFunctions {
                       pipelineParams.utype, pipelineParams.jtype, 
                       pipelineParams.ntype) 
 
+    val opcodeSeq = Seq(pipelineParams.lui, 
+                        pipelineParams.auipc, 
+                        pipelineParams.jump, 
+                        pipelineParams.jumpr, 
+                        pipelineParams.cjump, 
+                        pipelineParams.load, 
+                        pipelineParams.store, 
+                        pipelineParams.iops, 
+                        pipelineParams.iops32, 
+                        pipelineParams.rops, 
+                        pipelineParams.rops32, 
+                        pipelineParams.system, 
+                        pipelineParams.fence, 
+                        pipelineParams.amos)
+
     //opcode -> type_w
-    val instructionOpcodeToTypeMap = Seq((pipelineParams.lui.U,     pipelineParams.utype.U), 
-                                         (pipelineParams.auipc.U,   pipelineParams.utype.U), 
-                                         (pipelineParams.jump.U,    pipelineParams.jtype.U), 
-                                         (pipelineParams.jumpr.U,   pipelineParams.itype.U), 
-                                         (pipelineParams.cjump.U,   pipelineParams.btype.U), 
-                                         (pipelineParams.load.U,    pipelineParams.itype.U), 
-                                         (pipelineParams.store.U,   pipelineParams.stype.U), 
-                                         (pipelineParams.iops.U,    pipelineParams.itype.U), 
-                                         (pipelineParams.iops32.U,  pipelineParams.itype.U), 
-                                         (pipelineParams.rops.U,    pipelineParams.rtype.U), 
-                                         (pipelineParams.rops32.U,  pipelineParams.rtype.U), 
-                                         (pipelineParams.system.U,  pipelineParams.itype.U), 
-                                         (pipelineParams.fence.U,   pipelineParams.ntype.U), 
-                                         (pipelineParams.amos.U,    pipelineParams.rtype.U))
+    val instructionOpcodeToTypeMap = Map(pipelineParams.lui ->     pipelineParams.utype.U, 
+                                         pipelineParams.auipc ->   pipelineParams.utype.U, 
+                                         pipelineParams.jump ->    pipelineParams.jtype.U, 
+                                         pipelineParams.jumpr ->   pipelineParams.itype.U, 
+                                         pipelineParams.cjump ->   pipelineParams.btype.U, 
+                                         pipelineParams.load ->    pipelineParams.itype.U, 
+                                         pipelineParams.store ->   pipelineParams.stype.U, 
+                                         pipelineParams.iops ->    pipelineParams.itype.U, 
+                                         pipelineParams.iops32 ->  pipelineParams.itype.U, 
+                                         pipelineParams.rops ->    pipelineParams.rtype.U, 
+                                         pipelineParams.rops32 ->  pipelineParams.rtype.U, 
+                                         pipelineParams.system ->  pipelineParams.itype.U, 
+                                         pipelineParams.fence ->   pipelineParams.ntype.U, 
+                                         pipelineParams.amos ->    pipelineParams.rtype.U)
 	//default :   TYPE=ntype;
-    val INS_TYPE_ROM = mapInputToOutput(instructionOpcodeToTypeMap, pipelineParams.ntype.U, (x: chisel3.UInt, y: chisel3.UInt) => x === y)(_)
+    val INS_TYPE_ROM = mapInputToOutput(opcodeSeq, instructionOpcodeToTypeMap, pipelineParams.ntype.U, (x: String, y: chisel3.UInt) => x.U === y)(_)
 
     /*for (x, 32) -> repeat instruction(31) x times
           (x, 0) -> repeat 1'b0 x times
@@ -69,16 +80,18 @@ object paramFunctions {
 
     def IMM_EXT(machineInstruction: chisel3.UInt, type_w: chisel3.UInt): chisel3.UInt = {
 
-        val immediateMap = typeSeq.map(instructionType => {
+        var immediateMap = Map.empty[String, chisel3.UInt]
+        
+        typeSeq.map(instructionType => {
             val immediate = Cat(immediateEncodingsMap(instructionType).map {
               case (x, 32) => Fill(x, machineInstruction(31))
               case (x, 0) => 0.U(x.W)
               case (x, y) => machineInstruction(x, y)
             })
-            (instructionType.U, immediate)
+            immediateMap = immediateMap + (instructionType -> immediate)
         })
 
-        mapInputToOutput(immediateMap, 0.U(64.W), (x: chisel3.UInt, y: chisel3.UInt) => x === y)(type_w)
+        mapInputToOutput(typeSeq, immediateMap, 0.U(64.W), (x: String, y: chisel3.UInt) => x.U === y)(type_w)
 
     }
 }
