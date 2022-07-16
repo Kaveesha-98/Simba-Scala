@@ -104,12 +104,12 @@ object paramFunctions {
     val rs1ValidTypes = Seq(pipelineParams.rtype, pipelineParams.itype, pipelineParams.stype, pipelineParams.btype)
     val rs2ValidTypes = Seq(pipelineParams.rtype, pipelineParams.stype, pipelineParams.btype)
 
-    val rs1_sel_mux = createResultsToMultiplex(typeSeq, 0.U(5.W), (instructionType: String, machineInstruction: chisel3.UInt) => {
-        if (rs1ValidTypes.contains(instructionType)) machineInstruction(19, 15) else 0.U(5.W) 
-    })(_, _)
+    val sourceSelection = (validTypes: Seq[String]) => (instructionType: String, instrRegField: chisel3.UInt) => {
+        if (validTypes.contains(instructionType)) instrRegField else 0.U(5.W) 
+    }
 
-    val rs2_sel_mux = createResultsToMultiplex(typeSeq, 0.U(5.W), (instructionType: String, machineInstruction: chisel3.UInt) => {
-        if (rs2ValidTypes.contains(instructionType)) machineInstruction(24, 20) else 0.U(5.W) 
-    })(_, _)
+    val rs1_sel_mux = createResultsToMultiplex(typeSeq, 0.U(5.W), sourceSelection(rs1ValidTypes))(_, _)
+
+    val rs2_sel_mux = createResultsToMultiplex(typeSeq, 0.U(5.W), sourceSelection(rs2ValidTypes))(_, _)
 
 }
