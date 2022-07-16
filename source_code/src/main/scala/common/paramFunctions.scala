@@ -92,27 +92,24 @@ object paramFunctions {
                                     pipelineParams.utype -> utype_imm, pipelineParams.jtype -> jtype_imm,
                                     pipelineParams.ntype -> ntype_imm)
 
-    val IMM_EXT = createResultsToMultiplex(typeSeq, 0.U(64.W), (instructionType: String, machineInstruction: chisel3.UInt) => {
+    val immediateCreation = (instructionType: String, machineInstruction: chisel3.UInt) => {
         Cat(immediateEncodingsMap(instructionType).map {
             case (x, 32) => Fill(x, machineInstruction(31))
             case (x, 0) => 0.U(x.W)
             case (x, y) => machineInstruction(x, y)})
+    }
+
+    val IMM_EXT = createResultsToMultiplex(typeSeq, 0.U(64.W), immediateCreation)(_, _)
+
+    val rs1ValidTypes = Seq(pipelineParams.rtype, pipelineParams.itype, pipelineParams.stype, pipelineParams.btype)
+    val rs2ValidTypes = Seq(pipelineParams.rtype, pipelineParams.stype, pipelineParams.btype)
+
+    val rs1_sel_mux = createResultsToMultiplex(typeSeq, 0.U(5.W), (instructionType: String, machineInstruction: chisel3.UInt) => {
+        if (rs1ValidTypes.contains(instructionType)) machineInstruction(19, 15) else 0.U(5.W) 
     })(_, _)
 
-    /* def IMM_EXT(machineInstruction: chisel3.UInt, type_w: chisel3.UInt): chisel3.UInt = {
+    val rs2_sel_mux = createResultsToMultiplex(typeSeq, 0.U(5.W), (instructionType: String, machineInstruction: chisel3.UInt) => {
+        if (rs2ValidTypes.contains(instructionType)) machineInstruction(24, 20) else 0.U(5.W) 
+    })(_, _)
 
-        var immediateMap = Map.empty[String, chisel3.UInt]
-        
-        typeSeq.map(instructionType => {
-            val immediate = Cat(immediateEncodingsMap(instructionType).map {
-              case (x, 32) => Fill(x, machineInstruction(31))
-              case (x, 0) => 0.U(x.W)
-              case (x, y) => machineInstruction(x, y)
-            })
-            immediateMap = immediateMap + (instructionType -> immediate)
-        })
-
-        mapInputToOutput(typeSeq, immediateMap, 0.U(64.W), (x: String, y: chisel3.UInt) => x.U === y)(type_w)
-
-    } */
 }

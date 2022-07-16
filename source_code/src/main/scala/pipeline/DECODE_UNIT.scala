@@ -26,20 +26,10 @@ class DECODE_UNIT extends Module{
     val imm_out = paramFunctions.IMM_EXT(io.INSTRUCTION, type_w)
 
     /* selects which register to read as rs1 */
-    val rs1_sel_mux = VecInit.tabulate(8)(i => {
-        if (Seq(0, 1, 2, 3).contains(i)) {io.INSTRUCTION(19, 15)}
-        else {0.U(5.W)}
-    })
-
-    val rs1_sel = rs1_sel_mux(type_w)
-
+    val rs1_sel = paramFunctions.rs1_sel_mux(io.INSTRUCTION, type_w)
+    
     /* selects which register to read as rs2 */
-    val rs2_sel_mux = VecInit.tabulate(8)(i => {
-        if (Seq(0, 2, 3).contains(i)) {io.INSTRUCTION(24, 20)}
-        else {0.U(5.W)}
-    })
-
-    val rs2_sel = rs2_sel_mux(type_w)
+    val rs2_sel = paramFunctions.rs2_sel_mux(io.INSTRUCTION, type_w)
 
     /* register file of the cpu */
     val registerFile = new Array[chisel3.UInt](32)
