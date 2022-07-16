@@ -15,7 +15,7 @@ object paramFunctions {
      * @param mapInput input to hardware implemented map
      * @return TODO(Kaveesha)
      */
-    def mapInputToOutput[T <: Data](mapSeq: Seq[String], mapEntries: Map[String , T], default: T, f: (String, T) => chisel3.Bool)( mapInput: T): T = {
+    def mapInputToOutput[A, T <: Data](mapSeq: Seq[A], mapEntries: Map[A , T], default: T, f: (A, T) => chisel3.Bool)( mapInput: T): T = {
         val conditionArray = mapSeq.map(mapCondition => f(mapCondition, mapInput) -> mapEntries(mapCondition))
 
         MuxCase(default, conditionArray)
@@ -92,7 +92,7 @@ object paramFunctions {
                                     pipelineParams.utype -> utype_imm, pipelineParams.jtype -> jtype_imm,
                                     pipelineParams.ntype -> ntype_imm)
 
-    val immediateCreation = (instructionType: String, machineInstruction: chisel3.UInt) => {
+    def immediateCreation(instructionType: String, machineInstruction: chisel3.UInt) = {
         Cat(immediateEncodingsMap(instructionType).map {
             case (x, 32) => Fill(x, machineInstruction(31))
             case (x, 0) => 0.U(x.W)
@@ -104,7 +104,7 @@ object paramFunctions {
     val rs1ValidTypes = Seq(pipelineParams.rtype, pipelineParams.itype, pipelineParams.stype, pipelineParams.btype)
     val rs2ValidTypes = Seq(pipelineParams.rtype, pipelineParams.stype, pipelineParams.btype)
 
-    val regSourceSel = (validTypes: Seq[String]) => (instructionType: String, instrRegField: chisel3.UInt) => {
+    def regSourceSel(validTypes: Seq[String]) = (instructionType: String, instrRegField: chisel3.UInt) => {
         if (validTypes.contains(instructionType)) instrRegField else 0.U(5.W) 
     }
 
