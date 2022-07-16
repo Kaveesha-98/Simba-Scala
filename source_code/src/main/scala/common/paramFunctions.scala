@@ -21,6 +21,20 @@ object paramFunctions {
         MuxCase(default, conditionArray)
     }
 
+    def createResultsToMultiplex(inputSeq: Seq[String], default: chisel3.UInt, f: (String, chisel3.UInt) => chisel3.UInt)(
+        machineInstruction: chisel3.UInt, type_w: chisel3.UInt): chisel3.UInt = {
+
+        var resultMap = Map.empty[String, chisel3.UInt]
+        
+        inputSeq.map(inputType => {
+            val result = f(inputType, machineInstruction)
+            resultMap = resultMap + (inputType -> result)
+        })
+
+        mapInputToOutput(inputSeq, resultMap, default, (x: String, y: chisel3.UInt) => x.U === y)(type_w)
+
+    }
+
     val typeSeq = Seq(pipelineParams.rtype, pipelineParams.itype, 
                       pipelineParams.stype, pipelineParams.btype, 
                       pipelineParams.utype, pipelineParams.jtype, 
@@ -78,7 +92,14 @@ object paramFunctions {
                                     pipelineParams.utype -> utype_imm, pipelineParams.jtype -> jtype_imm,
                                     pipelineParams.ntype -> ntype_imm)
 
-    def IMM_EXT(machineInstruction: chisel3.UInt, type_w: chisel3.UInt): chisel3.UInt = {
+    val IMM_EXT = createResultsToMultiplex(typeSeq, 0.U(64.W), (instructionType: String, machineInstruction: chisel3.UInt) => {
+        Cat(immediateEncodingsMap(instructionType).map {
+            case (x, 32) => Fill(x, machineInstruction(31))
+            case (x, 0) => 0.U(x.W)
+            case (x, y) => machineInstruction(x, y)})
+    })(_, _)
+
+    /* def IMM_EXT(machineInstruction: chisel3.UInt, type_w: chisel3.UInt): chisel3.UInt = {
 
         var immediateMap = Map.empty[String, chisel3.UInt]
         
@@ -93,5 +114,5 @@ object paramFunctions {
 
         mapInputToOutput(typeSeq, immediateMap, 0.U(64.W), (x: String, y: chisel3.UInt) => x.U === y)(type_w)
 
-    }
+    } */
 }
