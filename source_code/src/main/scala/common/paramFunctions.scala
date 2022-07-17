@@ -15,7 +15,8 @@ object paramFunctions {
      * @param mapInput input to hardware implemented map
      * @return TODO(Kaveesha)
      */
-    def mapInputToOutput[A, T <: Data](mapSeq: Seq[A], mapEntries: Map[A , T], default: T, f: (A, T) => chisel3.Bool)( mapInput: T): T = {
+    def mapInputToOutput[A, T <: Data, U <: Data](mapSeq: Seq[A], mapEntries: Map[A , T], default: T, f: (A, U) => chisel3.Bool)( 
+        mapInput: U): T = {
         val conditionArray = mapSeq.map(mapCondition => f(mapCondition, mapInput) -> mapEntries(mapCondition))
 
         MuxCase(default, conditionArray)
