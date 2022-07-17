@@ -15,24 +15,24 @@ object paramFunctions {
      * @param mapInput input to hardware implemented map
      * @return TODO(Kaveesha)
      */
-    def mapInputToOutput[A, T <: Data, U <: Data](mapSeq: Seq[A], mapEntries: Map[A , T], default: T, f: (A, U) => chisel3.Bool)( 
+    def mapInputToOutput[A,T<:Data,U<:Data](mapSeq: Seq[A], mapEntries: Map[A , T], default: T, f: (A, U) => chisel3.Bool)( 
         mapInput: U): T = {
         val conditionArray = mapSeq.map(mapCondition => f(mapCondition, mapInput) -> mapEntries(mapCondition))
 
         MuxCase(default, conditionArray)
     }
 
-    def createResultsToMultiplex(inputSeq: Seq[String], default: chisel3.UInt, f: (String, chisel3.UInt) => chisel3.UInt)(
-        machineInstruction: chisel3.UInt, type_w: chisel3.UInt): chisel3.UInt = {
+    def createResultsToMultiplex[A,T<:Data,U<:Data,W<:Data](inputSeq: Seq[A], default: T, g: (A, W) => T, f: (A, U) => chisel3.Bool)(
+        machineInstruction: W, type_w: U): T = {
 
-        var resultMap = Map.empty[String, chisel3.UInt]
+        var resultMap = Map.empty[A, T]
         
         inputSeq.map(inputType => {
-            val result = f(inputType, machineInstruction)
+            val result = g(inputType, machineInstruction)
             resultMap = resultMap + (inputType -> result)
         })
 
-        mapInputToOutput(inputSeq, resultMap, default, (x: String, y: chisel3.UInt) => x.U === y)(type_w)
+        mapInputToOutput(inputSeq, resultMap, default, f)(type_w)
 
     }
 
@@ -100,7 +100,7 @@ object paramFunctions {
             case (x, y) => machineInstruction(x, y)})
     }
 
-    val IMM_EXT = createResultsToMultiplex(typeSeq, 0.U(64.W), immediateCreation)(_, _)
+    val IMM_EXT = createResultsToMultiplex(typeSeq, 0.U(64.W), immediateCreation, (x: String, y: chisel3.UInt) => x.U === y)(_, _)
 
     val rs1ValidTypes = Seq(pipelineParams.rtype, pipelineParams.itype, pipelineParams.stype, pipelineParams.btype)
     val rs2ValidTypes = Seq(pipelineParams.rtype, pipelineParams.stype, pipelineParams.btype)
@@ -109,8 +109,8 @@ object paramFunctions {
         if (validTypes.contains(instructionType)) instrRegField else 0.U(5.W) 
     }
 
-    val rs1_sel_mux = createResultsToMultiplex(typeSeq, 0.U(5.W), regSourceSel(rs1ValidTypes))(_, _)
+    val rs1_sel_mux = createResultsToMultiplex(typeSeq, 0.U(5.W), regSourceSel(rs1ValidTypes), (x: String, y: chisel3.UInt) => x.U === y)(_, _)
 
-    val rs2_sel_mux = createResultsToMultiplex(typeSeq, 0.U(5.W), regSourceSel(rs2ValidTypes))(_, _)
+    val rs2_sel_mux = createResultsToMultiplex(typeSeq, 0.U(5.W), regSourceSel(rs2ValidTypes), (x: String, y: chisel3.UInt) => x.U === y)(_, _)
 
 }
