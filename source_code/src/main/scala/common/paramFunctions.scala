@@ -24,6 +24,14 @@ object paramFunctions {
 
     def createResultsToMultiplex[A,T<:Data,U<:Data,W<:Data](inputSeq: Seq[A], default: T, g: (A, W) => T, f: (A, U) => chisel3.Bool)(
         machineInstruction: W, type_w: U): T = {
+            
+        val resultMap = createRuntimeLookUpMap(inputSeq, machineInstruction, g)
+
+        mapInputToOutput(inputSeq, resultMap, default, f)(type_w)
+
+    }
+
+    def createRuntimeLookUpMap[A,T<:Data,W<:Data](inputSeq: Seq[A], machineInstruction: W, g: (A, W) => T) = {
 
         var resultMap = Map.empty[A, T]
         
@@ -32,8 +40,7 @@ object paramFunctions {
             resultMap = resultMap + (inputType -> result)
         })
 
-        mapInputToOutput(inputSeq, resultMap, default, f)(type_w)
-
+        resultMap
     }
 
     val typeSeq = Seq(pipelineParams.rtype, pipelineParams.itype, 
