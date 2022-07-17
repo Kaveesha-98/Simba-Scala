@@ -24,7 +24,7 @@ object paramFunctions {
 
     def createResultsToMultiplex[A,T<:Data,U<:Data,W<:Data](inputSeq: Seq[A], default: T, g: (A, W) => T, f: (A, U) => chisel3.Bool)(
         machineInstruction: W, type_w: U): T = {
-            
+
         val resultMap = createRuntimeLookUpMap(inputSeq, machineInstruction, g)
 
         mapInputToOutput(inputSeq, resultMap, default, f)(type_w)
@@ -43,9 +43,12 @@ object paramFunctions {
         resultMap
     }
 
-    val typeSeq = Seq(pipelineParams.rtype, pipelineParams.itype, 
-                      pipelineParams.stype, pipelineParams.btype, 
-                      pipelineParams.utype, pipelineParams.jtype, 
+    val typeSeq = Seq(pipelineParams.rtype, 
+                      pipelineParams.itype, 
+                      pipelineParams.stype, 
+                      pipelineParams.btype, 
+                      pipelineParams.utype, 
+                      pipelineParams.jtype, 
                       pipelineParams.ntype) 
 
     val opcodeSeq = Seq(pipelineParams.lui, 
@@ -95,9 +98,12 @@ object paramFunctions {
 
     //val IMM_EXT = Seq(rtype_imm, itype_imm, stype_imm, btype_imm, utype_imm, jtype_imm, ntype_imm)
 
-    val immediateEncodingsMap = Map(pipelineParams.rtype -> rtype_imm, pipelineParams.itype -> itype_imm,
-                                    pipelineParams.stype -> stype_imm, pipelineParams.btype -> btype_imm,
-                                    pipelineParams.utype -> utype_imm, pipelineParams.jtype -> jtype_imm,
+    val immediateEncodingsMap = Map(pipelineParams.rtype -> rtype_imm, 
+                                    pipelineParams.itype -> itype_imm,
+                                    pipelineParams.stype -> stype_imm, 
+                                    pipelineParams.btype -> btype_imm,
+                                    pipelineParams.utype -> utype_imm, 
+                                    pipelineParams.jtype -> jtype_imm,
                                     pipelineParams.ntype -> ntype_imm)
 
     def immediateCreation(instructionType: String, machineInstruction: chisel3.UInt) = {
