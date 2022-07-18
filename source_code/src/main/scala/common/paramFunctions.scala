@@ -15,19 +15,19 @@ object paramFunctions {
      * @param mapInput input to hardware implemented map
      * @return TODO(Kaveesha)
      */
-    def mapInputToOutput[A,T<:Data,U<:Data](mapSeq: Seq[A], mapEntries: Map[A , T], default: T, f: (A, U) => chisel3.Bool)( 
+    def implementLookUp[A,T<:Data,U<:Data](mapSeq: Seq[A], mapEntries: Map[A , T], default: T, f: (A, U) => chisel3.Bool)( 
         mapInput: U): T = {
         val conditionArray = mapSeq.map(mapCondition => f(mapCondition, mapInput) -> mapEntries(mapCondition))
 
         MuxCase(default, conditionArray)
     }
 
-    def createResultsToMultiplex[A,T<:Data,U<:Data,W<:Data](inputSeq: Seq[A], default: T, g: (A, W) => T, f: (A, U) => chisel3.Bool)(
+    def implementRuntimeLookUp[A,T<:Data,U<:Data,W<:Data](inputSeq: Seq[A], default: T, g: (A, W) => T, f: (A, U) => chisel3.Bool)(
         machineInstruction: W, type_w: U): T = {
 
         val resultMap = createRuntimeLookUpMap(inputSeq, machineInstruction, g)
 
-        mapInputToOutput(inputSeq, resultMap, default, f)(type_w)
+        implementLookUp(inputSeq, resultMap, default, f)(type_w)
 
     }
 
@@ -82,7 +82,7 @@ object paramFunctions {
                                          pipelineParams.fence ->   pipelineParams.ntype.U, 
                                          pipelineParams.amos ->    pipelineParams.rtype.U)
 	//default :   TYPE=ntype;
-    val INS_TYPE_ROM = mapInputToOutput(opcodeSeq, instructionOpcodeToTypeMap, pipelineParams.ntype.U, (x: String, y: chisel3.UInt) => x.U === y)(_)
+    val INS_TYPE_ROM = implementLookUp(opcodeSeq, instructionOpcodeToTypeMap, pipelineParams.ntype.U, (x: String, y: chisel3.UInt) => x.U === y)(_)
 
     /*for (x, 32) -> repeat instruction(31) x times
           (x, 0) -> repeat 1'b0 x times
@@ -113,7 +113,7 @@ object paramFunctions {
             case (x, y) => machineInstruction(x, y)})
     }
 
-    val IMM_EXT = createResultsToMultiplex(typeSeq, 0.U(64.W), immediateCreation, (x: String, y: chisel3.UInt) => x.U === y)(_, _)
+    val IMM_EXT = implementRuntimeLookUp(typeSeq, 0.U(64.W), immediateCreation, (x: String, y: chisel3.UInt) => x.U === y)(_, _)
 
     val rs1ValidTypes = Seq(pipelineParams.rtype, pipelineParams.itype, pipelineParams.stype, pipelineParams.btype)
     val rs2ValidTypes = Seq(pipelineParams.rtype, pipelineParams.stype, pipelineParams.btype)
@@ -122,8 +122,8 @@ object paramFunctions {
         if (validTypes.contains(instructionType)) instrRegField else 0.U(5.W) 
     }
 
-    val rs1_sel_mux = createResultsToMultiplex(typeSeq, 0.U(5.W), regSourceSel(rs1ValidTypes), (x: String, y: chisel3.UInt) => x.U === y)(_, _)
+    val rs1_sel_mux = implementRuntimeLookUp(typeSeq, 0.U(5.W), regSourceSel(rs1ValidTypes), (x: String, y: chisel3.UInt) => x.U === y)(_, _)
 
-    val rs2_sel_mux = createResultsToMultiplex(typeSeq, 0.U(5.W), regSourceSel(rs2ValidTypes), (x: String, y: chisel3.UInt) => x.U === y)(_, _)
+    val rs2_sel_mux = implementRuntimeLookUp(typeSeq, 0.U(5.W), regSourceSel(rs2ValidTypes), (x: String, y: chisel3.UInt) => x.U === y)(_, _)
 
 }
