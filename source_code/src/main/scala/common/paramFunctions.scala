@@ -32,15 +32,8 @@ object paramFunctions {
     }
 
     def createRuntimeLookUpMap[A,T<:Data,W<:Data](inputSeq: Seq[A], machineInstruction: W, g: (A, W) => T) = {
-
-        var resultMap = Map.empty[A, T]
         
-        inputSeq.map(inputType => {
-            val result = g(inputType, machineInstruction)
-            resultMap = resultMap + (inputType -> result)
-        })
-
-        resultMap
+        inputSeq.map(inputType =>  (inputType -> g(inputType, machineInstruction))).toMap
     }
 
     val typeSeq = Seq(pipelineParams.rtype, 
