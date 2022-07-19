@@ -15,8 +15,8 @@ object paramFunctions {
      * @param mapInput input to hardware implemented map
      * @return TODO(Kaveesha)
      */
-    def implementLookUp[A,T<:Data,U<:Data](mapSeq: Seq[A], mapEntries: Map[A , T], default: T, f: (A, U) => chisel3.Bool)( 
-        mapInput: U): T = {
+    def implementLookUp[A,T<:Data,U<:Data](mapSeq: Seq[A], mapEntries: Map[A , T], default: T)
+        ( mapInput: U)( f: (A, U) => chisel3.Bool): T = {
         val conditionArray = mapSeq.map(mapCondition => f(mapCondition, mapInput) -> mapEntries(mapCondition))
 
         MuxCase(default, conditionArray)
@@ -27,12 +27,12 @@ object paramFunctions {
 
         val resultMap = createRuntimeLookUpMap(inputSeq, machineInstruction, g)
 
-        implementLookUp(inputSeq, resultMap, default, f)(type_w)
+        implementLookUp(inputSeq, resultMap, default)(type_w)(f)
 
     }
 
     def createRuntimeLookUpMap[A,T<:Data,W<:Data](inputSeq: Seq[A], machineInstruction: W, g: (A, W) => T) = {
-        
+
         inputSeq.map(inputType =>  (inputType -> g(inputType, machineInstruction))).toMap
     }
 
@@ -75,7 +75,8 @@ object paramFunctions {
                                          pipelineParams.fence ->   pipelineParams.ntype.U, 
                                          pipelineParams.amos ->    pipelineParams.rtype.U)
 	//default :   TYPE=ntype;
-    val INS_TYPE_ROM = implementLookUp(opcodeSeq, instructionOpcodeToTypeMap, pipelineParams.ntype.U, (x: String, y: chisel3.UInt) => x.U === y)(_)
+    def INS_TYPE_ROM(machineInstruction: chisel3.UInt) = 
+        implementLookUp(opcodeSeq, instructionOpcodeToTypeMap, pipelineParams.ntype.U)(machineInstruction)((x, y) => x.U === y)
 
     /*for (x, 32) -> repeat instruction(31) x times
           (x, 0) -> repeat 1'b0 x times
