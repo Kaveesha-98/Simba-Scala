@@ -4,6 +4,8 @@ import chisel3._
 import chisel3.util._
 import chisel3.Driver
 
+import pipelineParams._
+
 object paramFunctions {
 
     /**
@@ -44,7 +46,7 @@ object paramFunctions {
                       pipelineParams.jtype, 
                       pipelineParams.ntype) 
 
-    val opcodeSeq = Seq(pipelineParams.lui, 
+    val opSeq = Seq(pipelineParams.lui, 
                         pipelineParams.auipc, 
                         pipelineParams.jump, 
                         pipelineParams.jumpr, 
@@ -60,7 +62,7 @@ object paramFunctions {
                         pipelineParams.amos)
 
     //opcode -> type_w
-    val instructionOpcodeToTypeMap = Map(pipelineParams.lui ->     pipelineParams.utype.U, 
+    val instrOpToTypeMap = Map(pipelineParams.lui ->     pipelineParams.utype.U, 
                                          pipelineParams.auipc ->   pipelineParams.utype.U, 
                                          pipelineParams.jump ->    pipelineParams.jtype.U, 
                                          pipelineParams.jumpr ->   pipelineParams.itype.U, 
@@ -75,8 +77,8 @@ object paramFunctions {
                                          pipelineParams.fence ->   pipelineParams.ntype.U, 
                                          pipelineParams.amos ->    pipelineParams.rtype.U)
 	//default :   TYPE=ntype;
-    def INS_TYPE_ROM(machineInstruction: chisel3.UInt) = 
-        implementLookUp(opcodeSeq, instructionOpcodeToTypeMap, pipelineParams.ntype.U)(machineInstruction)((x, y) => x.U === y)
+    def INS_TYPE_ROM(machineInstr: UInt) = 
+        implementLookUp(opSeq, instrOpToTypeMap, ntype.U)(machineInstr)((x, y) => x.U === y)
 
     /*for (x, 32) -> repeat instruction(31) x times
           (x, 0) -> repeat 1'b0 x times
