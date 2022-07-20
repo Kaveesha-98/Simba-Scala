@@ -18,13 +18,13 @@ object paramFunctions {
      * @return TODO(Kaveesha)
      */
     def implementLookUp[A,T<:Data,U<:Data](mapSeq: Seq[A], mapEntries: Map[A , T], default: T)
-        ( mapInput: U)( f: (A, U) => chisel3.Bool): T = {
+        ( mapInput: U)( f: (A, U) => Bool): T = {
         val conditionArray = mapSeq.map(mapCondition => f(mapCondition, mapInput) -> mapEntries(mapCondition))
 
         MuxCase(default, conditionArray)
     }
 
-    def implementRuntimeLookUp[A,T<:Data,U<:Data,W<:Data](inputSeq: Seq[A], default: T, g: (A, W) => T, f: (A, U) => chisel3.Bool)(
+    def implementRuntimeLookUp[A,T<:Data,U<:Data,W<:Data](inputSeq: Seq[A], default: T, g: (A, W) => T, f: (A, U) => Bool)(
         machineInstruction: W, type_w: U): T = {
 
         val resultMap = createRuntimeLookUpMap(inputSeq, machineInstruction, g)
@@ -83,24 +83,24 @@ object paramFunctions {
                                     jtype -> jtype_imm,
                                     ntype -> ntype_imm)
 
-    def immediateCreation(instructionType: String, machineInstruction: chisel3.UInt) = {
+    def immediateCreation(instructionType: String, machineInstruction: UInt) = {
         Cat(immediateEncodingsMap(instructionType).map {
             case (x, 32) => Fill(x, machineInstruction(31))
             case (x, 0) => 0.U(x.W)
             case (x, y) => machineInstruction(x, y)})
     }
 
-    val IMM_EXT = implementRuntimeLookUp(typeSeq, 0.U(64.W), immediateCreation, (x: String, y: chisel3.UInt) => x.U === y)(_, _)
+    val IMM_EXT = implementRuntimeLookUp(typeSeq, 0.U(64.W), immediateCreation, (x: String, y: UInt) => x.U === y)_
 
     val rs1ValidTypes = Seq(rtype, itype, stype, btype)
     val rs2ValidTypes = Seq(rtype, stype, btype)
 
-    def regSourceSel(validTypes: Seq[String]) = (instructionType: String, instrRegField: chisel3.UInt) => {
+    def regSourceSel(validTypes: Seq[String]) = (instructionType: String, instrRegField: UInt) => {
         if (validTypes.contains(instructionType)) instrRegField else 0.U(5.W) 
     }
 
-    val rs1_sel_mux = implementRuntimeLookUp(typeSeq, 0.U(5.W), regSourceSel(rs1ValidTypes), (x: String, y: chisel3.UInt) => x.U === y)(_, _)
+    val rs1_sel_mux = implementRuntimeLookUp(typeSeq, 0.U(5.W), regSourceSel(rs1ValidTypes), (x: String, y: UInt) => x.U === y)_
 
-    val rs2_sel_mux = implementRuntimeLookUp(typeSeq, 0.U(5.W), regSourceSel(rs2ValidTypes), (x: String, y: chisel3.UInt) => x.U === y)(_, _)
+    val rs2_sel_mux = implementRuntimeLookUp(typeSeq, 0.U(5.W), regSourceSel(rs2ValidTypes), (x: String, y: UInt) => x.U === y)_
 
 }
