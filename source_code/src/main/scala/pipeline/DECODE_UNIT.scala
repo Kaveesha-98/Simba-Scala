@@ -4,6 +4,7 @@ import chisel3._
 import chisel3.util._
 import chisel3.Driver
 
+import common._
 import common.paramFunctions
 import common.pipelineParams
 
@@ -13,6 +14,8 @@ class DECODE_UNIT extends Module{
         val WB_DATA     = Input(UInt(64.W))
         val WB_DES      = Input(UInt(5.W))
         val TYPE_MEM3_WB= Input(UInt(2.W))
+
+        val testInput = Input(UInt(64.W))
 		
 		val out = Output(UInt(64.W))
         val out2 = Output(UInt(64.W))
@@ -51,7 +54,10 @@ class DECODE_UNIT extends Module{
 	io.out := imm_out
 
     io.out2 := rs1_out + 1.U
-    io.out3 := rs2_out
+    //io.out3 := rs2_out
+
+    val testEncoding = rEncode(opcode = "b1111000", funct3 = "b101", funct7 = "b1100110")
+    io.out3 := Mux(testEncoding.compareOpFields(io.testInput), 1.U, 0.U)
 
     /* val x = RegInit(0.U(1.W))
     val y = WireInit(0.U(1.W))
