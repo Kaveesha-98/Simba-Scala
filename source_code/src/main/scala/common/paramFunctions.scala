@@ -6,6 +6,49 @@ import chisel3.Driver
 
 import pipelineParams._
 
+abstract class instructionFormats {
+
+    def compareOpFields(machineInstr: UInt): Bool
+
+}
+
+case class rEncode(funct7: String, funct3: String, opcode: String) extends instructionFormats {
+
+    def compareOpFields(machineInstr: UInt) = {
+        this.opcode.U === machineInstr(6, 0) &&
+        this.funct3.U === machineInstr(14, 12) &&
+        this.funct7.U === machineInstr(31, 25)
+    }
+
+}
+
+case class iEncode(funct3: String, opcode: String) extends instructionFormats {
+
+    def compareOpFields(machineInstr: UInt) = {
+        this.opcode.U === machineInstr(6, 0) &&
+        this.funct3.U === machineInstr(14, 12)
+    }
+
+}
+
+case class shamt5b(funct6: String, funct3: String, opcode: String) extends instructionFormats {
+
+    def compareOpFields(machineInstr: UInt) = {
+        this.opcode.U === machineInstr(6, 0) &&
+        this.funct3.U === machineInstr(14, 12) &&
+        this.funct6.U === machineInstr(31, 26)
+    }
+
+}
+
+case class uEncode(opcode: String) extends instructionFormats {
+
+    def compareOpFields(machineInstr: UInt) = {
+        this.opcode.U === machineInstr(6, 0)
+    }
+
+}
+
 object paramFunctions {
 
     /**
