@@ -38,44 +38,25 @@ object paramFunctions {
         inputSeq.map(inputType =>  (inputType -> g(inputType, machineInstruction))).toMap
     }
 
-    val typeSeq = Seq(pipelineParams.rtype, 
-                      pipelineParams.itype, 
-                      pipelineParams.stype, 
-                      pipelineParams.btype, 
-                      pipelineParams.utype, 
-                      pipelineParams.jtype, 
-                      pipelineParams.ntype) 
+    val typeSeq = Seq(rtype, itype, stype, btype, utype, jtype, ntype) 
 
-    val opSeq = Seq(pipelineParams.lui, 
-                        pipelineParams.auipc, 
-                        pipelineParams.jump, 
-                        pipelineParams.jumpr, 
-                        pipelineParams.cjump, 
-                        pipelineParams.load, 
-                        pipelineParams.store, 
-                        pipelineParams.iops, 
-                        pipelineParams.iops32, 
-                        pipelineParams.rops, 
-                        pipelineParams.rops32, 
-                        pipelineParams.system, 
-                        pipelineParams.fence, 
-                        pipelineParams.amos)
+    val opSeq = Seq(lui, auipc, jump, jumpr, cjump, load, store, iops, iops32, rops, rops32, system, fence, amos)
 
     //opcode -> type_w
-    val instrOpToTypeMap = Map(pipelineParams.lui ->     pipelineParams.utype.U, 
-                                         pipelineParams.auipc ->   pipelineParams.utype.U, 
-                                         pipelineParams.jump ->    pipelineParams.jtype.U, 
-                                         pipelineParams.jumpr ->   pipelineParams.itype.U, 
-                                         pipelineParams.cjump ->   pipelineParams.btype.U, 
-                                         pipelineParams.load ->    pipelineParams.itype.U, 
-                                         pipelineParams.store ->   pipelineParams.stype.U, 
-                                         pipelineParams.iops ->    pipelineParams.itype.U, 
-                                         pipelineParams.iops32 ->  pipelineParams.itype.U, 
-                                         pipelineParams.rops ->    pipelineParams.rtype.U, 
-                                         pipelineParams.rops32 ->  pipelineParams.rtype.U, 
-                                         pipelineParams.system ->  pipelineParams.itype.U, 
-                                         pipelineParams.fence ->   pipelineParams.ntype.U, 
-                                         pipelineParams.amos ->    pipelineParams.rtype.U)
+    val instrOpToTypeMap = Map(lui      -> utype.U, 
+                               auipc    -> utype.U, 
+                               jump     -> jtype.U, 
+                               jumpr    -> itype.U, 
+                               cjump    -> btype.U, 
+                               load     -> itype.U, 
+                               store    -> stype.U, 
+                               iops     -> itype.U, 
+                               iops32   -> itype.U, 
+                               rops     -> rtype.U, 
+                               rops32   -> rtype.U, 
+                               system   -> itype.U, 
+                               fence    -> ntype.U, 
+                               amos     -> rtype.U)
 	//default :   TYPE=ntype;
     def INS_TYPE_ROM(machineInstr: UInt) = 
         implementLookUp(opSeq, instrOpToTypeMap, ntype.U)(machineInstr)((x, y) => x.U === y)
@@ -94,13 +75,13 @@ object paramFunctions {
 
     //val IMM_EXT = Seq(rtype_imm, itype_imm, stype_imm, btype_imm, utype_imm, jtype_imm, ntype_imm)
 
-    val immediateEncodingsMap = Map(pipelineParams.rtype -> rtype_imm, 
-                                    pipelineParams.itype -> itype_imm,
-                                    pipelineParams.stype -> stype_imm, 
-                                    pipelineParams.btype -> btype_imm,
-                                    pipelineParams.utype -> utype_imm, 
-                                    pipelineParams.jtype -> jtype_imm,
-                                    pipelineParams.ntype -> ntype_imm)
+    val immediateEncodingsMap = Map(rtype -> rtype_imm, 
+                                    itype -> itype_imm,
+                                    stype -> stype_imm, 
+                                    btype -> btype_imm,
+                                    utype -> utype_imm, 
+                                    jtype -> jtype_imm,
+                                    ntype -> ntype_imm)
 
     def immediateCreation(instructionType: String, machineInstruction: chisel3.UInt) = {
         Cat(immediateEncodingsMap(instructionType).map {
@@ -111,8 +92,8 @@ object paramFunctions {
 
     val IMM_EXT = implementRuntimeLookUp(typeSeq, 0.U(64.W), immediateCreation, (x: String, y: chisel3.UInt) => x.U === y)(_, _)
 
-    val rs1ValidTypes = Seq(pipelineParams.rtype, pipelineParams.itype, pipelineParams.stype, pipelineParams.btype)
-    val rs2ValidTypes = Seq(pipelineParams.rtype, pipelineParams.stype, pipelineParams.btype)
+    val rs1ValidTypes = Seq(rtype, itype, stype, btype)
+    val rs2ValidTypes = Seq(rtype, stype, btype)
 
     def regSourceSel(validTypes: Seq[String]) = (instructionType: String, instrRegField: chisel3.UInt) => {
         if (validTypes.contains(instructionType)) instrRegField else 0.U(5.W) 
