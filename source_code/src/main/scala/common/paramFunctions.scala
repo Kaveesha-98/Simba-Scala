@@ -6,45 +6,16 @@ import chisel3.Driver
 
 import pipelineParams._
 
-abstract class instructionFormats {
+class insCmp(opcode: String = "", funct3: String = "", funct7: String = ""){
 
-    def compareOpFields(machineInstr: UInt): Bool
+    def getCmpRes(cmpField: String, instrField: UInt) = 
+        if (cmpField == "") true.B
+        else cmpField.U === instrField
 
-}
-
-case class rEncode(funct7: String, funct3: String, opcode: String) extends instructionFormats {
-
-    def compareOpFields(machineInstr: UInt) = {
-        this.opcode.U === machineInstr(6, 0) &&
-        this.funct3.U === machineInstr(14, 12) &&
-        this.funct7.U === machineInstr(31, 25)
-    }
-
-}
-
-case class iEncode(funct3: String, opcode: String) extends instructionFormats {
-
-    def compareOpFields(machineInstr: UInt) = {
-        this.opcode.U === machineInstr(6, 0) &&
-        this.funct3.U === machineInstr(14, 12)
-    }
-
-}
-
-case class shamt5b(funct6: String, funct3: String, opcode: String) extends instructionFormats {
-
-    def compareOpFields(machineInstr: UInt) = {
-        this.opcode.U === machineInstr(6, 0) &&
-        this.funct3.U === machineInstr(14, 12) &&
-        this.funct6.U === machineInstr(31, 26)
-    }
-
-}
-
-case class uEncode(opcode: String) extends instructionFormats {
-
-    def compareOpFields(machineInstr: UInt) = {
-        this.opcode.U === machineInstr(6, 0)
+    def cmpFields(machineInstr: UInt) = {
+        getCmpRes(opcode, machineInstr(6, 0)) &&
+        getCmpRes(funct3, machineInstr(14, 12)) &&
+        getCmpRes(funct7, machineInstr(31, 25))
     }
 
 }
