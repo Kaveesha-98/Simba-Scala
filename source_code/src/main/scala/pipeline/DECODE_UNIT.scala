@@ -5,7 +5,7 @@ import chisel3.util._
 import chisel3.Driver
 
 import common._
-import common.paramFunctions
+import common.paramFunctions._
 import common.pipelineParams
 
 class DECODE_UNIT extends Module{
@@ -19,7 +19,7 @@ class DECODE_UNIT extends Module{
 		
 		val out = Output(UInt(64.W))
         val out2 = Output(UInt(64.W))
-        val out3 = Output(UInt(64.W))
+        val out3 = Output(new controlIO)
 	})
 	
 	/* opcode of the instruction is mapped to number according to paramFunctions.instructionOpcodeToTypeMap */
@@ -54,10 +54,11 @@ class DECODE_UNIT extends Module{
 	io.out := imm_out
 
     io.out2 := rs1_out + 1.U
-    io.out3 := rs2_out
+    //io.out3 := rs2_out
 
-    /* val testEncoding = rEncode(opcode = "b1111000", funct3 = "b101", funct7 = "b1100110")
-    io.out3 := Mux(testEncoding.compareOpFields(io.testInput), 1.U, 0.U) */
+    //val testEncoding = new insCmp(opcode = "b1111000")
+    io.out3 := implementLookUp(contorlUnit.lutCtrlUnit.map(_._1), contorlUnit.lutCtrlUnit.toMap, contorlUnit.ctrlUnitSignals("b0", "b0", "b0", "b0", "b0", "b1"))(
+        io.INSTRUCTION)((instrClass, hwin) => instrClass.cmpFields(hwin)) 
 
     /* val x = WireInit(contorlUnit.ctrlUnitSignals("1", "0"))
     val y = WireInit(0.U(1.W))
