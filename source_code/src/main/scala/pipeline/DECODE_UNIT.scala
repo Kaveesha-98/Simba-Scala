@@ -54,12 +54,12 @@ class DECODE_UNIT extends Module{
 	io.out := imm_out
 
     io.out2 := rs1_out + 1.U
-    //io.out3 := rs2_out
+    io.out3 := rs2_out
 
-    val testEncoding = rEncode(opcode = "b1111000", funct3 = "b101", funct7 = "b1100110")
-    io.out3 := Mux(testEncoding.compareOpFields(io.testInput), 1.U, 0.U)
+    /* val testEncoding = rEncode(opcode = "b1111000", funct3 = "b101", funct7 = "b1100110")
+    io.out3 := Mux(testEncoding.compareOpFields(io.testInput), 1.U, 0.U) */
 
-    /* val x = RegInit(0.U(1.W))
+    /* val x = WireInit(contorlUnit.ctrlUnitSignals("1", "0"))
     val y = WireInit(0.U(1.W))
 
     when(x){
