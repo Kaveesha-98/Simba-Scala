@@ -35,4 +35,43 @@ object pipelineParams {
     val  idle  = "b00"
     val  ld    = "b01"
     val  alu   = "b10"
+
+    val a_bus_rs2_sel = "b1"
+    val a_bus_imm_sel = "b0"
+    val b_bus_rs1_sel = "b1"
+    val b_bus_pc_sel  = "b0" 
+
+    val alu_add     = "b0000"
+    val alu_sub     = "b0001"
+    val alu_sll     = "b0010"
+    val alu_sltu    = "b0011"
+    val alu_xor     = "b0100"
+    val alu_srl     = "b0101"
+    val alu_sra     = "b0110"
+    val alu_or      = "b0111"
+    val alu_and     = "b1000"
+    val alu_a       = "b1001"
+    val alu_b       = "b1010"
+    val alu_slt     = "b1011"
+    val alu_b4      = "b1100"
+    val alu_idle    = "b1101"
+    val alu_csr     = "b1110"
+    val alu_mstd    = "b1111"
+
+    //csr OPS
+    val sys_idle    = "b0000" 
+    
+    val sys_ecall   = "b0001"
+    val sys_ebreak  = "b0010"
+    val sys_uret    = "b0011"
+    val sys_sret    = "b0100"
+    val sys_mret    = "b0101"
+    val sys_wfi     = "b0110"
+    
+    val sys_csrrw   = "b1001"
+    val sys_csrrs   = "b1010"
+    val sys_csrrc   = "b1011"
+    val sys_csrrwi  = "b1101"
+    val sys_csrrsi  = "b1110"
+    val sys_csrrci  = "b1111"
 }
