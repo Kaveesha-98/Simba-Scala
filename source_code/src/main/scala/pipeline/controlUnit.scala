@@ -4,8 +4,9 @@ import chisel3._
 import chisel3.util._
 import chisel3.Driver
 
+import common._
 import common.paramFunctions
-import common.pipelineParams
+import common.pipelineParams._
 
 class controlIO extends Bundle{
     val A_BUS_SEL = UInt(1.W)
@@ -27,5 +28,13 @@ object contorlUnit {
         controls.undefined := undefined.U
         controls
     }
+
+    val lutCtrlUnit = Seq(
+        //RV32I Base instruction set
+        (new insCmp(opcode = "b0110111"), ctrlUnitSignals(a_bus_imm_sel, b_bus_pc_sel, alu_a, sys_idle, alu, "b0")), //lui
+        (new insCmp(opcode = "b0010111"), ctrlUnitSignals(a_bus_imm_sel, b_bus_pc_sel, alu_a, sys_idle, alu, "b0")), //auipc
+        (new insCmp(opcode = "b1101111"), ctrlUnitSignals(a_bus_imm_sel, b_bus_pc_sel, alu_b4, sys_idle, alu, "b0")), //jal
+        (new insCmp(opcode = "b0110011", funct3 = "b000", funct7 = "b0000000"), ctrlUnitSignals(a_bus_imm_sel, b_bus_pc_sel, alu_add, sys_idle, alu, "b0"))
+    )
     
 }
