@@ -6,7 +6,8 @@ import chisel3.Driver
 
 import pipelineParams._
 
-class insCmp(opcode: String = "", funct3: String = "", funct7: String = ""){
+class insCmp(opcode: String = "", funct3: String = "", funct7: String = "",
+             funct6: String = ""){
 
     def getCmpRes(cmpField: String, instrField: UInt) = 
         if (cmpField == "") true.B
@@ -15,7 +16,8 @@ class insCmp(opcode: String = "", funct3: String = "", funct7: String = ""){
     def cmpFields(machineInstr: UInt) = {
         getCmpRes(opcode, machineInstr(6, 0)) &&
         getCmpRes(funct3, machineInstr(14, 12)) &&
-        getCmpRes(funct7, machineInstr(31, 25))
+        getCmpRes(funct7, machineInstr(31, 25)) &&
+        getCmpRes(funct6, machineInstr(31, 26))
     }
 
 }
