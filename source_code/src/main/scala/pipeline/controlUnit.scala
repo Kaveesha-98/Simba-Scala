@@ -64,7 +64,24 @@ object contorlUnit {
         (new insCmp(opcode = "b0110011", funct3 = "b100", funct7 = "b0000001"), ctrlUnitSignals(a_bus_rs2_sel, b_bus_rs1_sel, alu_mstd, sys_idle, alu, "b0")),//div
         (new insCmp(opcode = "b0110011", funct3 = "b101", funct7 = "b0000001"), ctrlUnitSignals(a_bus_rs2_sel, b_bus_rs1_sel, alu_mstd, sys_idle, alu, "b0")),//divu
         (new insCmp(opcode = "b0110011", funct3 = "b110", funct7 = "b0000001"), ctrlUnitSignals(a_bus_rs2_sel, b_bus_rs1_sel, alu_mstd, sys_idle, alu, "b0")),//rem
-        (new insCmp(opcode = "b0110011", funct3 = "b111", funct7 = "b0000001"), ctrlUnitSignals(a_bus_rs2_sel, b_bus_rs1_sel, alu_mstd, sys_idle, alu, "b0"))//remu
+        (new insCmp(opcode = "b0110011", funct3 = "b111", funct7 = "b0000001"), ctrlUnitSignals(a_bus_rs2_sel, b_bus_rs1_sel, alu_mstd, sys_idle, alu, "b0")),//remu
+        (new insCmp(opcode = "b0011011", funct3 = "b000"), ctrlUnitSignals(a_bus_imm_sel, b_bus_rs1_sel, alu_add, sys_idle, alu, "b0")),//addiw
+        (new insCmp(opcode = "b0011011", funct3 = "b001", funct7 = "b0000000"), ctrlUnitSignals(a_bus_imm_sel, b_bus_rs1_sel, alu_sll, sys_idle, alu, "b0")),//slliw
+        (new insCmp(opcode = "b0011011", funct3 = "b101", funct7 = "b0000000"), ctrlUnitSignals(a_bus_imm_sel, b_bus_rs1_sel, alu_srl, sys_idle, alu, "b0")),//srliw
+        (new insCmp(opcode = "b0011011", funct3 = "b101", funct7 = "b0100000"), ctrlUnitSignals(a_bus_imm_sel, b_bus_rs1_sel, alu_sra, sys_idle, alu, "b0")),//sraiw
+        (new insCmp(opcode = "b0111011", funct3 = "b000", funct7 = "b0000000"), ctrlUnitSignals(a_bus_rs2_sel, b_bus_rs1_sel, alu_add, sys_idle, alu, "b0")),//addw
+        (new insCmp(opcode = "b0111011", funct3 = "b000", funct7 = "b0100000"), ctrlUnitSignals(a_bus_rs2_sel, b_bus_rs1_sel, alu_sub, sys_idle, alu, "b0")),//subw
+        (new insCmp(opcode = "b0111011", funct3 = "b001", funct7 = "b0000000"), ctrlUnitSignals(a_bus_rs2_sel, b_bus_rs1_sel, alu_sll, sys_idle, alu, "b0")),//sllw
+        (new insCmp(opcode = "b0111011", funct3 = "b101", funct7 = "b0000000"), ctrlUnitSignals(a_bus_rs2_sel, b_bus_rs1_sel, alu_srl, sys_idle, alu, "b0")),//srlw
+        (new insCmp(opcode = "b0111011", funct3 = "b101", funct7 = "b0100000"), ctrlUnitSignals(a_bus_rs2_sel, b_bus_rs1_sel, alu_sra, sys_idle, alu, "b0")),//sraw
+        (new insCmp(opcode = "b0111011", funct3 = "b000", funct7 = "b0000001"), ctrlUnitSignals(a_bus_rs2_sel, b_bus_rs1_sel, alu_mstd, sys_idle, alu, "b0")),//mulw
+        (new insCmp(opcode = "b0111011", funct3 = "b100", funct7 = "b0000001"), ctrlUnitSignals(a_bus_rs2_sel, b_bus_rs1_sel, alu_mstd, sys_idle, alu, "b0")),//divw
+        (new insCmp(opcode = "b0111011", funct3 = "b101", funct7 = "b0000001"), ctrlUnitSignals(a_bus_rs2_sel, b_bus_rs1_sel, alu_mstd, sys_idle, alu, "b0")),//divuw
+        (new insCmp(opcode = "b0111011", funct3 = "b110", funct7 = "b0000001"), ctrlUnitSignals(a_bus_rs2_sel, b_bus_rs1_sel, alu_mstd, sys_idle, alu, "b0")),//remw
+        (new insCmp(opcode = "b0111011", funct3 = "b111", funct7 = "b0000001"), ctrlUnitSignals(a_bus_rs2_sel, b_bus_rs1_sel, alu_mstd, sys_idle, alu, "b0"))//remuw
+        //(new insCmp(opcode = "b1110011", rd = "b00000", funct3 = "b000", rs1 = "b00000", rs2 = "b00000", funct7 = "b0000000"), ctrlUnitSignals()),//ecall
+        //(new insCmp(opcode = "b1110011", rd = "b00000", funct3 = "b000", rs1 = "b00000", rs2 = "b00001", funct7 = "b0000000"), ctrlUnitSignals()),//ebreak
+
     )
     
 }
