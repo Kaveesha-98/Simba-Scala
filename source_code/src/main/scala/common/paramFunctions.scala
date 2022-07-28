@@ -6,6 +6,25 @@ import chisel3.Driver
 
 import pipelineParams._
 
+class insCmp(opcode: String = "", funct3: String = "", funct7: String = "",
+             funct6: String = "", rd: String = "", rs1: String = "", rs2: String = ""){
+
+    def getCmpRes(cmpField: String, instrField: UInt) = 
+        if (cmpField == "") true.B
+        else cmpField.U === instrField
+
+    def cmpFields(machineInstr: UInt) = {
+        getCmpRes(opcode, machineInstr(6, 0)) &&
+        getCmpRes(funct3, machineInstr(14, 12)) &&
+        getCmpRes(funct7, machineInstr(31, 25)) &&
+        getCmpRes(funct6, machineInstr(31, 26)) &&
+        getCmpRes(rd, machineInstr(11, 7)) &&
+        getCmpRes(rs1, machineInstr(19, 15)) &&
+        getCmpRes(rs2, machineInstr(24, 20))
+    }
+
+}
+
 object paramFunctions {
 
     /**
@@ -18,13 +37,13 @@ object paramFunctions {
      * @return TODO(Kaveesha)
      */
     def implementLookUp[A,T<:Data,U<:Data](mapSeq: Seq[A], mapEntries: Map[A , T], default: T)
-        ( mapInput: U)( f: (A, U) => chisel3.Bool): T = {
+        ( mapInput: U)( f: (A, U) => Bool): T = {
         val conditionArray = mapSeq.map(mapCondition => f(mapCondition, mapInput) -> mapEntries(mapCondition))
 
         MuxCase(default, conditionArray)
     }
 
-    def implementRuntimeLookUp[A,T<:Data,U<:Data,W<:Data](inputSeq: Seq[A], default: T, g: (A, W) => T, f: (A, U) => chisel3.Bool)(
+    def implementRuntimeLookUp[A,T<:Data,U<:Data,W<:Data](inputSeq: Seq[A], default: T, g: (A, W) => T, f: (A, U) => Bool)(
         machineInstruction: W, type_w: U): T = {
 
         val resultMap = createRuntimeLookUpMap(inputSeq, machineInstruction, g)
@@ -38,44 +57,25 @@ object paramFunctions {
         inputSeq.map(inputType =>  (inputType -> g(inputType, machineInstruction))).toMap
     }
 
-    val typeSeq = Seq(pipelineParams.rtype, 
-                      pipelineParams.itype, 
-                      pipelineParams.stype, 
-                      pipelineParams.btype, 
-                      pipelineParams.utype, 
-                      pipelineParams.jtype, 
-                      pipelineParams.ntype) 
+    val typeSeq = Seq(rtype, itype, stype, btype, utype, jtype, ntype) 
 
-    val opSeq = Seq(pipelineParams.lui, 
-                        pipelineParams.auipc, 
-                        pipelineParams.jump, 
-                        pipelineParams.jumpr, 
-                        pipelineParams.cjump, 
-                        pipelineParams.load, 
-                        pipelineParams.store, 
-                        pipelineParams.iops, 
-                        pipelineParams.iops32, 
-                        pipelineParams.rops, 
-                        pipelineParams.rops32, 
-                        pipelineParams.system, 
-                        pipelineParams.fence, 
-                        pipelineParams.amos)
+    val opSeq = Seq(lui, auipc, jump, jumpr, cjump, load, store, iops, iops32, rops, rops32, system, fence, amos)
 
     //opcode -> type_w
-    val instrOpToTypeMap = Map(pipelineParams.lui ->     pipelineParams.utype.U, 
-                                         pipelineParams.auipc ->   pipelineParams.utype.U, 
-                                         pipelineParams.jump ->    pipelineParams.jtype.U, 
-                                         pipelineParams.jumpr ->   pipelineParams.itype.U, 
-                                         pipelineParams.cjump ->   pipelineParams.btype.U, 
-                                         pipelineParams.load ->    pipelineParams.itype.U, 
-                                         pipelineParams.store ->   pipelineParams.stype.U, 
-                                         pipelineParams.iops ->    pipelineParams.itype.U, 
-                                         pipelineParams.iops32 ->  pipelineParams.itype.U, 
-                                         pipelineParams.rops ->    pipelineParams.rtype.U, 
-                                         pipelineParams.rops32 ->  pipelineParams.rtype.U, 
-                                         pipelineParams.system ->  pipelineParams.itype.U, 
-                                         pipelineParams.fence ->   pipelineParams.ntype.U, 
-                                         pipelineParams.amos ->    pipelineParams.rtype.U)
+    val instrOpToTypeMap = Map(lui      -> utype.U, 
+                               auipc    -> utype.U, 
+                               jump     -> jtype.U, 
+                               jumpr    -> itype.U, 
+                               cjump    -> btype.U, 
+                               load     -> itype.U, 
+                               store    -> stype.U, 
+                               iops     -> itype.U, 
+                               iops32   -> itype.U, 
+                               rops     -> rtype.U, 
+                               rops32   -> rtype.U, 
+                               system   -> itype.U, 
+                               fence    -> ntype.U, 
+                               amos     -> rtype.U)
 	//default :   TYPE=ntype;
     def INS_TYPE_ROM(machineInstr: UInt) = 
         implementLookUp(opSeq, instrOpToTypeMap, ntype.U)(machineInstr)((x, y) => x.U === y)
@@ -94,32 +94,32 @@ object paramFunctions {
 
     //val IMM_EXT = Seq(rtype_imm, itype_imm, stype_imm, btype_imm, utype_imm, jtype_imm, ntype_imm)
 
-    val immediateEncodingsMap = Map(pipelineParams.rtype -> rtype_imm, 
-                                    pipelineParams.itype -> itype_imm,
-                                    pipelineParams.stype -> stype_imm, 
-                                    pipelineParams.btype -> btype_imm,
-                                    pipelineParams.utype -> utype_imm, 
-                                    pipelineParams.jtype -> jtype_imm,
-                                    pipelineParams.ntype -> ntype_imm)
+    val immediateEncodingsMap = Map(rtype -> rtype_imm, 
+                                    itype -> itype_imm,
+                                    stype -> stype_imm, 
+                                    btype -> btype_imm,
+                                    utype -> utype_imm, 
+                                    jtype -> jtype_imm,
+                                    ntype -> ntype_imm)
 
-    def immediateCreation(instructionType: String, machineInstruction: chisel3.UInt) = {
+    def immediateCreation(instructionType: String, machineInstruction: UInt) = {
         Cat(immediateEncodingsMap(instructionType).map {
             case (x, 32) => Fill(x, machineInstruction(31))
             case (x, 0) => 0.U(x.W)
             case (x, y) => machineInstruction(x, y)})
     }
 
-    val IMM_EXT = implementRuntimeLookUp(typeSeq, 0.U(64.W), immediateCreation, (x: String, y: chisel3.UInt) => x.U === y)(_, _)
+    val IMM_EXT = implementRuntimeLookUp(typeSeq, 0.U(64.W), immediateCreation, (x: String, y: UInt) => x.U === y)_
 
-    val rs1ValidTypes = Seq(pipelineParams.rtype, pipelineParams.itype, pipelineParams.stype, pipelineParams.btype)
-    val rs2ValidTypes = Seq(pipelineParams.rtype, pipelineParams.stype, pipelineParams.btype)
+    val rs1ValidTypes = Seq(rtype, itype, stype, btype)
+    val rs2ValidTypes = Seq(rtype, stype, btype)
 
-    def regSourceSel(validTypes: Seq[String]) = (instructionType: String, instrRegField: chisel3.UInt) => {
+    def regSourceSel(validTypes: Seq[String]) = (instructionType: String, instrRegField: UInt) => {
         if (validTypes.contains(instructionType)) instrRegField else 0.U(5.W) 
     }
 
-    val rs1_sel_mux = implementRuntimeLookUp(typeSeq, 0.U(5.W), regSourceSel(rs1ValidTypes), (x: String, y: chisel3.UInt) => x.U === y)(_, _)
+    val rs1_sel_mux = implementRuntimeLookUp(typeSeq, 0.U(5.W), regSourceSel(rs1ValidTypes), (x: String, y: UInt) => x.U === y)_
 
-    val rs2_sel_mux = implementRuntimeLookUp(typeSeq, 0.U(5.W), regSourceSel(rs2ValidTypes), (x: String, y: chisel3.UInt) => x.U === y)(_, _)
+    val rs2_sel_mux = implementRuntimeLookUp(typeSeq, 0.U(5.W), regSourceSel(rs2ValidTypes), (x: String, y: UInt) => x.U === y)_
 
 }

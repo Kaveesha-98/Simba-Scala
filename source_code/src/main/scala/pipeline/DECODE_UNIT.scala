@@ -4,7 +4,8 @@ import chisel3._
 import chisel3.util._
 import chisel3.Driver
 
-import common.paramFunctions
+import common._
+import common.paramFunctions._
 import common.pipelineParams
 
 class DECODE_UNIT extends Module{
@@ -13,10 +14,12 @@ class DECODE_UNIT extends Module{
         val WB_DATA     = Input(UInt(64.W))
         val WB_DES      = Input(UInt(5.W))
         val TYPE_MEM3_WB= Input(UInt(2.W))
+
+        val testInput = Input(UInt(64.W))
 		
 		val out = Output(UInt(64.W))
         val out2 = Output(UInt(64.W))
-        val out3 = Output(UInt(64.W))
+        val out3 = Output(new controlIO)
 	})
 	
 	/* opcode of the instruction is mapped to number according to paramFunctions.instructionOpcodeToTypeMap */
@@ -51,9 +54,13 @@ class DECODE_UNIT extends Module{
 	io.out := imm_out
 
     io.out2 := rs1_out + 1.U
-    io.out3 := rs2_out
+    //io.out3 := rs2_out
 
-    /* val x = RegInit(0.U(1.W))
+    //val testEncoding = new insCmp(opcode = "b1111000")
+    io.out3 := implementLookUp(contorlUnit.lutCtrlUnit.map(_._1), contorlUnit.lutCtrlUnit.toMap, contorlUnit.ctrlUnitSignals("b0", "b0", "b0", "b0", "b0", "b1"))(
+        io.INSTRUCTION)((instrClass, hwin) => instrClass.cmpFields(hwin)) 
+
+    /* val x = WireInit(contorlUnit.ctrlUnitSignals("1", "0"))
     val y = WireInit(0.U(1.W))
 
     when(x){
