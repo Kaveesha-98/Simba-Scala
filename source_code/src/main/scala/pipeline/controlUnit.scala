@@ -8,6 +8,8 @@ import common._
 import common.paramFunctions
 import common.pipelineParams._
 
+// testing whether we can edit tags - edit on tag v0
+
 class controlIO extends Bundle{
     val A_BUS_SEL = UInt(1.W)
     val B_BUS_SEL = UInt(1.W)
