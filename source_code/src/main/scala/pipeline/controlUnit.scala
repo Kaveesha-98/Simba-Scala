@@ -17,6 +17,8 @@ class controlIO extends Bundle{
     val undefined = UInt(1.W)
     }
 
+// adding changes as a new tag
+
 object contorlUnit {  
     def ctrlUnitSignals(A_BUS_SEL: String, B_BUS_SEL: String, ALU_CNT: String, CSR_CNT: String, TYPE: String, undefined: String) = {
         val controls = Wire(new controlIO)
